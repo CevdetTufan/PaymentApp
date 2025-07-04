@@ -9,7 +9,7 @@ PaymentApp is a lightweight ASP.NET Core platform for processing customer paymen
 
 ## Technologies Used
 
-* C# / .NET 6 (ASP.NET Core)
+* C# / .NET 9 (ASP.NET Core)
 * Entity Framework Core
 * RabbitMQ
 * MongoDB
