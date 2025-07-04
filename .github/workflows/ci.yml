@@ -26,4 +26,7 @@ jobs:
       run: dotnet build PaymentApp.sln --no-restore --configuration Release
 
     - name: Run tests
-      run: dotnet test test/PaymentApp.Test/PaymentApp.Test.csproj --no-build --verbosity normal
+      run: |
+        dotnet build PaymentApp.sln --configuration Release
+        dotnet test src/PaymentApp.Api/PaymentApp.Api.csproj --no-build
+        dotnet test test/PaymentApp.Test/PaymentApp.Test.csproj --no-build --verbosity normal
