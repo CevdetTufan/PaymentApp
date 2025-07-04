@@ -1,0 +1,29 @@
+name: CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '9.0.x'
+
+    - name: Install dependencies
+      run: dotnet restore PaymentApp.sln
+
+    - name: Build
+      run: dotnet build PaymentApp.sln --no-restore --configuration Release
+
+    - name: Run tests
+      run: dotnet test test/PaymentApp.Test/PaymentApp.Test.csproj --no-build --verbosity normal
