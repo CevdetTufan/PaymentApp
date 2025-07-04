@@ -9,7 +9,7 @@ PaymentApp is a lightweight ASP.NET Core platform for processing customer paymen
 
 ## Technologies Used
 
-* C# / .NET 6 (ASP.NET Core)
+* C# / .NET 9 (ASP.NET Core)
 * Entity Framework Core
 * RabbitMQ
 * MongoDB
@@ -50,26 +50,26 @@ PaymentApp is a lightweight ASP.NET Core platform for processing customer paymen
 ```plain
 PaymentApp/
 ├── src/
-│   ├── PaymentAPI/
+│   ├── PaymentApp.Api/
 │   │   ├── Controllers/
 │   │   ├── Program.cs
 │   │   ├── Dockerfile
 │   │   └── appsettings.json
-│   ├── PaymentApplication/
+│   ├── PaymentApp.Application/
 │   │   ├── DTOs/
 │   │   ├── Commands/
 │   │   └── Queries/
-│   ├── PaymentDomain/
-│   ├── PaymentInfrastructure/
+│   ├── PaymentApp.Domain/
+│   ├── PaymentApp.Infrastructure/
 │   │   ├── DataModule.cs
 │   │   ├── ServiceModule.cs
 │   │   ├── Repositories/
 │   │   ├── EventPublisher/
 │   │   ├── EventConsumer/
 │   │   └── MongoDb/
-│   └── SharedKernel/
-├── tests/
-│   └── PaymentApp.Tests/
+│   └── PaymentApp.SharedKernel/
+├── test/
+│   └── PaymentApp.Test/
 ├── docker-compose.yml
 ├── .github/workflows/ci.yml
 ├── README.md
