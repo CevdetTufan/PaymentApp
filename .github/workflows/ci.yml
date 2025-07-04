@@ -25,8 +25,27 @@ jobs:
     - name: Build solution
       run: dotnet build PaymentApp.sln --configuration Release --no-restore
 
-    - name: Run all tests
-      run: dotnet test PaymentApp.sln \
-        --configuration Release \
-        --no-build \
-        --verbosity normal
+    - name: Debug and Run unit tests
+      # This step is modified to include debugging commands and a more verbose test run.
+      run: |
+        echo "--- Current Directory Contents (Recursive) ---"
+        ls -R
+        echo "--- Environment Variables ---"
+        env | sort
+        echo "--- Attempting to run unit tests with diagnostic verbosity ---"
+        dotnet test test/PaymentApp.Test/PaymentApp.Test.csproj \
+          --configuration Release \
+          --no-build \
+          --verbosity normal \
+          /p:VSTestVerbosity=detailed # This is for VSTest runner output
+          # Add this line below for even more verbose MSBuild output, but be prepared for a lot of logs.
+          # /p:MSBuildLogVerbosity=Diagnostic
+
+        echo "--- If the above failed, trying with solution file ---"
+        # Sometimes, specifying the solution file helps dotnet test correctly resolve projects.
+        # This tells dotnet test to find the test project within the context of the solution.
+        dotnet test PaymentApp.sln \
+          --filter "FullyQualifiedName~PaymentApp.Test" \
+          --configuration Release \
+          --no-build \
+          --verbosity normal
