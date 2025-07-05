@@ -1,12 +1,22 @@
+using Autofac;
+using Autofac.Extensions.DependencyInjection;
+using PaymentApp.Application.Modules;
+using PaymentApp.Infrastructure.Modules;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory())
+			.ConfigureContainer<ContainerBuilder>(container =>
+			{
+				container.RegisterModule(new DataModule());
+				container.RegisterModule(new ServiceModule());
+			});
+
 builder.Services.AddOpenApi();
+
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
@@ -21,4 +31,4 @@ app.MapGet("/healtcheck", () =>
 })
 .WithName("healtcheck");
 
-app.Run();
+await app.RunAsync();
