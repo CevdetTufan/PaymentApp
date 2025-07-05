@@ -1,3 +1,200 @@
+# Teknik Doküman - PaymentApp
+
+Bu doküman, mevcut **PaymentApp** deposunun yapısını, katmanlarını, önemli sınıf ve arayüzlerini, veri erişim ve test stratejilerini ayrıntılı olarak açıklar. Kod örnekleri ve test tanımları da yer almaktadır.
+
+---
+
+## 1. Proje Katmanları ve Dizin Yapısı
+
+```plain
+PaymentApp/
+├── src/
+│   ├── PaymentApp.Api/            # API Katmanı (Presentation)
+│   ├── PaymentApp.Application/    # Uygulama Katmanı (Use Cases)
+│   ├── PaymentApp.Domain/         # Domain Katmanı (Entities, Value Objects, Interfaces)
+│   ├── PaymentApp.Infrastructure/ # Infrastructure Katmanı (EF Core, Repositories)
+│   └── PaymentApp.SharedKernel/   # Shared Kernel (ortak sınıf ve yardımcılar)
+├── test/
+│   └── PaymentApp.Test/           # Test Projeleri (xUnit & Moq)
+├── docker/                        # Docker Compose ve Dockerfile
+├── .github/workflows/ci.yml       # CI İş Akışı
+└── README.md
+```
+
+---
+
+## 2. Domain Katmanı
+
+### 2.1 Entity: `Payment`
+
+```csharp
+public class Payment
+{
+    public Guid Id { get; private set; }
+    public Guid CustomerId { get; private set; }
+    public Money Amount { get; private set; }
+    public PaymentStatus Status { get; private set; }
+    public DateTime CreatedAt { get; private set; }
+    public DateTime? ProcessedAt { get; private set; }
+
+    public Payment(Guid customerId, Money amount)
+    {
+        Id = Guid.NewGuid();
+        CustomerId = customerId;
+        Amount = amount;
+        Status = PaymentStatus.Pending;
+        CreatedAt = DateTime.UtcNow;
+    }
+
+    public void MarkCompleted() { /* ... */ }
+    public void MarkFailed()    { /* ... */ }
+    public void MarkRefunded()  { /* ... */ }
+}
+```
+
+- **İş akışı:** `Status` sahası yalnızca `MarkCompleted()`, `MarkFailed()` ve `MarkRefunded()` metotlarıyla değişir.
+- **Kapsülleme:** `private set` ile dış müdahaleyi engeller.
+
+### 2.2 Value Object: `Money`
+
+```csharp
+public sealed class Money : IEquatable<Money>
+{
+    public decimal Amount { get; }
+    public string Currency { get; }
+
+    public Money(decimal amount, string currency)
+    {
+        if (amount < 0) throw new ArgumentException(...);
+        Currency = currency ?? throw new ArgumentNullException(...);
+        Amount = amount;
+    }
+
+    public override bool Equals(object? obj) => Equals(obj as Money);
+    public bool Equals(Money? other) { /* ... */ }
+    public override int GetHashCode()  => HashCode.Combine(Amount, Currency);
+    public static bool operator ==(Money? a, Money? b) => ...;
+    public static bool operator !=(Money? a, Money? b) => ...;
+}
+```
+
+- **Değer tabanlı eşitlik:** `Equals` ve `GetHashCode` override edilmiştir.
+
+### 2.3 Repository Arayüzleri
+
+```csharp
+public interface IRepository<T> where T : class
+{
+    Task<T?> GetByIdAsync(Guid id, CancellationToken token = default);
+    Task<IReadOnlyList<T>> ListAllAsync(CancellationToken token = default);
+    Task AddAsync(T entity, CancellationToken token = default);
+    Task UpdateAsync(T entity, CancellationToken token = default);
+    Task DeleteAsync(T entity, CancellationToken token = default);
+}
+
+public interface IPaymentRepository : IRepository<Payment>
+{
+    Task<IReadOnlyList<Payment>> ListByCustomerAsync(Guid customerId, CancellationToken token = default);
+}
+```
+
+- Arayüzler **Domain** katmanında tanımlıdır.
+
+---
+
+## 3. Infrastructure Katmanı
+
+### 3.1 EF Core DbContext
+
+```csharp
+public class PaymentDbContext : DbContext
+{
+    public DbSet<Payment> Payments { get; set; }
+
+    public PaymentDbContext(DbContextOptions<PaymentDbContext> opts) : base(opts) { }
+
+    protected override void OnModelCreating(ModelBuilder builder)
+    {
+        builder.Entity<Payment>().OwnsOne(p => p.Amount);
+    }
+}
+```
+
+### 3.2 Generic ve Özel Repository
+
+```csharp
+public class Repository<T> : IRepository<T> where T: class
+{ /* CRUD implementasyonu */ }
+
+public class PaymentRepository : Repository<Payment>, IPaymentRepository
+{ /* ListByCustomerAsync implementasyonu */ }
+```
+
+### 3.3 DI Kaydı (Autofac)
+
+```csharp
+public class DataModule : Module
+{
+    protected override void Load(ContainerBuilder builder)
+    {
+        builder.RegisterType<PaymentDbContext>().AsSelf();
+        builder.RegisterGeneric(typeof(Repository<>))
+               .As(typeof(IRepository<>));
+        builder.RegisterType<PaymentRepository>().As<IPaymentRepository>();
+    }
+}
+```
+
+---
+
+## 4. Application Katmanı
+
+### 4.1 DTO’lar
+
+```csharp
+public record CreatePaymentDto(Guid CustomerId, decimal Amount, string Currency);
+public record PaymentDto(Guid Id, Guid CustomerId, decimal Amount, string Currency, string Status, DateTime CreatedAt, DateTime? ProcessedAt);
+```
+
+### 4.2 Command & Query Pattern
+
+- **Command**: `CreatePaymentCommand : ICommand<PaymentDto>`
+- **Handler**: `CreatePaymentCommandHandler.HandleAsync(...)`
+- **Query**: `GetPaymentByIdQuery : IQuery<PaymentDto>`
+- **Handler**: `GetPaymentByIdQueryHandler.HandleAsync(...)`
+
+---
+
+## 5. Test Katmanı
+
+### 5.1 Domain Testleri
+
+- **MoneyTests**: negatif değer, null currency, eşitlik operatörleri.
+- **PaymentEntityTests**: ctor, `MarkCompleted/Failed/Refunded` metotları.
+
+### 5.2 Repository Entegrasyon Testleri
+
+```csharp
+public class PaymentRepositoryTests : IDisposable
+{ /* In-Memory DB ile Add, GetById, ListByCustomer, Update testleri */ }
+```
+
+### 5.3 Handler Birim Testleri
+
+- **CreatePaymentCommandHandlerTests**: doğru DTO üretimi, repo çağrısı.
+- **GetPaymentByIdQueryHandlerTests**: bulunma ve bulunmama senaryoları.
+
+---
+
+## 6. CI / CD
+
+- **.github/workflows/ci.yml**: `dotnet build`, `dotnet vstest` adımları.
+
+---
+
+Bu doküman, projedeki ana bileşenleri ve kod akışını detaylıca anlatır. Projeye yeni katılan geliştiriciler veya dışarıdan bakacaklar için rehber niteliğindedir.
+
+
 Bu GitHub Actions iş akışı, bir .NET projesi için sürekli entegrasyon (CI) sürecini otomatikleştirmek üzere tasarlanmıştır. Temel olarak, kodunuzda bir değişiklik olduğunda (belirli dallara push veya pull request yapıldığında) otomatik olarak çalışır, bağımlılıkları geri yükler, projeyi derler ve birim testlerini çalıştırır.
 
 **İş Akışının Bölümleri:**
