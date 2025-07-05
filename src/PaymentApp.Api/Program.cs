@@ -20,6 +20,8 @@ builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory())
 				container.RegisterModule(new ServiceModule());
 			});
 
+builder.Services.AddHealthChecks();
+
 builder.Services.AddOpenApi();
 
 
@@ -33,16 +35,17 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 
-app.MapGet("/healtcheck", () =>
+app.MapGet("/healthcheck", () =>
 {
     return Results.Ok($"Healthy. Request time is {DateTime.UtcNow}");
 })
-.WithName("healtcheck");
+.WithName("healthcheck");
 
 
 app.MapGet("/healthcheck-db", async (PaymentDbContext db) =>
 {
-	return await db.Database.CanConnectAsync()
+	bool canConnect = await db.Database.CanConnectAsync();
+	return canConnect
 		? Results.Ok("DB OK")
 		: Results.StatusCode(503);
 });
