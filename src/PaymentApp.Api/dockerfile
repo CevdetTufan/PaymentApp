@@ -1,0 +1,12 @@
+﻿FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+WORKDIR /src
+COPY ["src/PaymentApp.Api/PaymentApp.Api.csproj", "src/PaymentApp.Api/"]
+RUN dotnet restore "src/PaymentApp.Api/PaymentApp.Api.csproj"
+COPY . .
+WORKDIR "/src/src/PaymentApp.Api"
+RUN dotnet publish -c Debug -o /app/publish
+
+FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS runtime
+WORKDIR /app
+COPY --from=build /app/publish .
+ENTRYPOINT ["dotnet", "PaymentApp.Api.dll"]
