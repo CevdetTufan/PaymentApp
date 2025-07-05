@@ -1,0 +1,19 @@
+version: "3.9"
+
+networks:
+  paymentapp-net:
+    name: paymentapp-net
+    driver: bridge
+
+services:
+  api:
+    build:
+      context: ..
+      dockerfile: src/PaymentApp.Api/Dockerfile
+    ports:
+      - "5141:5141"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: "http://*:5141"
+    networks:
+      - paymentapp-net
