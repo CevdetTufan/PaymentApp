@@ -1,9 +1,14 @@
-﻿namespace PaymentApp.Domain.ValueObjects;
+﻿using Microsoft.EntityFrameworkCore;
 
+namespace PaymentApp.Domain.ValueObjects;
+
+[Owned]
 public sealed class Money : IEquatable<Money> // Sealed the class to address S4035
 {
 	public decimal Amount { get; }
 	public string Currency { get; }
+
+	private Money() { } // Private constructor for EF Core
 
 	public Money(decimal amount, string currency)
 	{
