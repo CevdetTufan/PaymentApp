@@ -1,12 +1,34 @@
-﻿FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+﻿# 1) Build aşaması
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /src
+
+# 1.1) Çözüm dosyasını ve tüm projelerin csproj'lerini kopyala
+COPY ["PaymentApp.sln", "./"]
 COPY ["src/PaymentApp.Api/PaymentApp.Api.csproj", "src/PaymentApp.Api/"]
-RUN dotnet restore "src/PaymentApp.Api/PaymentApp.Api.csproj"
+COPY ["src/PaymentApp.Application/PaymentApp.Application.csproj", "src/PaymentApp.Application/"]
+COPY ["src/PaymentApp.Domain/PaymentApp.Domain.csproj", "src/PaymentApp.Domain/"]
+COPY ["src/PaymentApp.Infrastructure/PaymentApp.Infrastructure.csproj", "src/PaymentApp.Infrastructure/"]
+COPY ["src/PaymentApp.SharedKernel/PaymentApp.SharedKernel.csproj", "src/PaymentApp.SharedKernel/"]
+
+# **TEST PROJESİNİN** csproj’unu da kopyalayın
+COPY ["test/PaymentApp.Test/PaymentApp.Test.csproj", "test/PaymentApp.Test/"]
+
+# 1.2) Tüm projeler için paketleri restore et
+RUN dotnet restore "PaymentApp.sln"
+
+# 1.3) Kaynak kodu kopyala ve publish et
 COPY . .
 WORKDIR "/src/src/PaymentApp.Api"
-RUN dotnet publish -c Debug -o /app/publish
+RUN dotnet publish -c Release -o /app/publish
 
+# 2) Runtime aşaması
 FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS runtime
 WORKDIR /app
+
+ENV ASPNETCORE_ENVIRONMENT=Development
+ENV ASPNETCORE_URLS="http://*:5141"
+
+EXPOSE 5141
+
 COPY --from=build /app/publish .
 ENTRYPOINT ["dotnet", "PaymentApp.Api.dll"]

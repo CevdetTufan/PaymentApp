@@ -19,10 +19,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PaymentApp.Test", "test\Pay
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docker", "docker", "{9AC904B8-6F0B-4198-AF4F-5D4DFF79D5D2}"
 	ProjectSection(SolutionItems) = preProject
+		.env = .env
 		docker\docker-compose.yml = docker\docker-compose.yml
 	EndProjectSection
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PaymentApp.SharedKernel", "src\PaymentApp.SharedKernel\PaymentApp.SharedKernel.csproj", "{9222C20E-7692-47C6-A976-DE713A19F17B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -50,10 +49,6 @@ Global
 		{3BD4BB20-8862-4D19-AD94-6B726F961A96}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3BD4BB20-8862-4D19-AD94-6B726F961A96}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3BD4BB20-8862-4D19-AD94-6B726F961A96}.Release|Any CPU.Build.0 = Release|Any CPU
-		{9222C20E-7692-47C6-A976-DE713A19F17B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9222C20E-7692-47C6-A976-DE713A19F17B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9222C20E-7692-47C6-A976-DE713A19F17B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9222C20E-7692-47C6-A976-DE713A19F17B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -64,7 +59,6 @@ Global
 		{1861704F-616A-445B-BE65-849AB9745AF5} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{51B9D116-56BB-46E0-A1D7-B82945260A46} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{3BD4BB20-8862-4D19-AD94-6B726F961A96} = {FEA6D22A-5D4C-43FC-9CA7-A885A3279F2E}
-		{9222C20E-7692-47C6-A976-DE713A19F17B} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {31F633D0-77B3-4835-8DC9-48FA219D0F12}

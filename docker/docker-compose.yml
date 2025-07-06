@@ -1,12 +1,20 @@
-version: "3.9"
-
-networks:
-  paymentapp-net:
-    name: paymentapp-net
-    driver: bridge
-
 services:
-  api:
+  paymentapp-postgres:
+    image: postgres:15
+    container_name: paymentapp-postgres
+    environment:
+      POSTGRES_DB: PaymentAppDb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Your_password123
+    ports:
+      - "15437:5432"
+    volumes:
+      - paymentapp_pgdata:/var/lib/postgresql/data
+    networks:
+      - paymentapp-net
+
+  api-paymentapp:
+    container_name: paymentapp-api
     build:
       context: ..
       dockerfile: src/PaymentApp.Api/Dockerfile
@@ -15,5 +23,14 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       ASPNETCORE_URLS: "http://*:5141"
+      ConnectionStrings__DefaultConnection: "Host=paymentapp-postgres;Port=5432;Database=PaymentAppDb;Username=postgres;Password=Your_password123"
+    depends_on:
+      - paymentapp-postgres
     networks:
       - paymentapp-net
+
+volumes:
+  paymentapp_pgdata:
+
+networks:
+  paymentapp-net:
