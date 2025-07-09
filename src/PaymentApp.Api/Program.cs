@@ -1,9 +1,11 @@
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
+using PaymentApp.Api.Endpoints;
 using PaymentApp.Application.Modules;
 using PaymentApp.Infrastructure.Data;
 using PaymentApp.Infrastructure.Modules;
+using Scalar.AspNetCore;
 using System;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -21,7 +23,6 @@ builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory())
 				container.RegisterModule(new ServiceModule());
 			});
 
-builder.Services.AddHealthChecks();
 
 builder.Services.AddOpenApi();
 
@@ -31,6 +32,14 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+
+	app.MapScalarApiReference(options =>
+	{
+		options
+			.WithTitle("PaymentApp API")
+			.WithDarkMode()   
+			.WithTheme(ScalarTheme.Saturn);
+	});
 }
 
 using (var scope = app.Services.CreateScope())
@@ -41,21 +50,6 @@ using (var scope = app.Services.CreateScope())
 
 app.UseHttpsRedirection();
 
-
-app.MapGet("/healthcheck", () =>
-{
-    return Results.Ok($"Healthy. Request time is {DateTime.UtcNow}");
-})
-.WithName("healthcheck");
-
-
-app.MapGet("/healthcheck-db", async (PaymentDbContext db) =>
-{
-	bool canConnect = await db.Database.CanConnectAsync();
-	return canConnect
-		? Results.Ok("DB OK")
-		: Results.StatusCode(503);
-});
-
+app.MapHealthEndpoints();
 
 await app.RunAsync();
