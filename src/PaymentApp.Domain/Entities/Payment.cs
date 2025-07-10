@@ -12,7 +12,10 @@ public class Payment
 	public DateTime CreatedAt { get; private set; }
 	public DateTime? ProcessedAt { get; private set; }
 
-	private Payment() { }
+	protected Payment()
+	{
+		// EF Core requires a parameterless constructor for entity instantiation
+	}
 
 	public Payment(Guid customerId, Money amount)
 	{

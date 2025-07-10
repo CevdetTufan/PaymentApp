@@ -5,6 +5,7 @@ using PaymentApp.Api.Endpoints;
 using PaymentApp.Application.Modules;
 using PaymentApp.Infrastructure.Data;
 using PaymentApp.Infrastructure.Modules;
+using PaymentApp.Infrastructure.Seeding;
 using Scalar.AspNetCore;
 using System;
 
@@ -46,6 +47,13 @@ using (var scope = app.Services.CreateScope())
 {
 	var db = scope.ServiceProvider.GetRequiredService<PaymentDbContext>();
 	db.Database.Migrate();
+
+	if (app.Environment.IsDevelopment() && !await db.Payments.AnyAsync())
+	{
+		var payments = PaymentFaker.Get(1000);
+		await db.Payments.AddRangeAsync(payments);
+		await db.SaveChangesAsync();
+	}
 }
 
 app.UseHttpsRedirection();
