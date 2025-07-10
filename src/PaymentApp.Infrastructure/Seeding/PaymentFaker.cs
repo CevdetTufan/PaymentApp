@@ -10,8 +10,8 @@ public static class PaymentFaker
 
 	public static List<Payment> Get(int count = 50)
 	{
-		IEnumerable<Guid> customerIds = Enumerable.Range(1, 10)
-			.Select(i => Guid.NewGuid());
+		var customerIds = Enumerable.Range(1, 10)
+			.Select(i => Guid.NewGuid()).ToList();
 
 		var faker = new Faker<Payment>()
 				.CustomInstantiator(f =>

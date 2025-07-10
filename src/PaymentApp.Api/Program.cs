@@ -7,7 +7,6 @@ using PaymentApp.Infrastructure.Data;
 using PaymentApp.Infrastructure.Modules;
 using PaymentApp.Infrastructure.Seeding;
 using Scalar.AspNetCore;
-using System;
 
 var builder = WebApplication.CreateBuilder(args);
 
