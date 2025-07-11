@@ -29,7 +29,7 @@ public static class PaymentEndpoints
 		.WithOpenApi();
 
 
-		// POST /payments
+		// POST /CreatePayment
 		group.MapPost("", async (
 				 CreatePaymentDto dto,
 				 ICommandHandler<CreatePaymentCommand, PaymentDto> handler
@@ -41,5 +41,18 @@ public static class PaymentEndpoints
 		 .AddEndpointFilter<ValidationFilter<CreatePaymentDto>>()
 		 .WithName("CreatePayment")
 		 .WithOpenApi();
+
+
+		// PUT /CompletePayment
+		group.MapPut("/complete{paymentId:guid}", async (
+				Guid paymentId,
+				ICommandHandler<CompletePaymentCommand, PaymentDto> handler
+			) =>
+		{
+			var result = await handler.HandleAsync(new CompletePaymentCommand(paymentId));
+			return Results.Ok(result);
+		})
+		  .WithName("CompletePayment")
+		  .WithOpenApi();
 	}
 }
