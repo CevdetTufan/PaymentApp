@@ -5,9 +5,9 @@ using PaymentApp.Application.Interfaces.Repositories;
 namespace PaymentApp.Application.Commands;
 
 public record GetPaymentByIdQuery(Guid Id)
-	: IQuery<PaymentDto>;
+	: IQuery<PaymentDto?>;
 
-public class GetPaymentByIdQueryHandler : IQueryHandler<GetPaymentByIdQuery, PaymentDto>
+public class GetPaymentByIdQueryHandler : IQueryHandler<GetPaymentByIdQuery, PaymentDto?>
 {
 	private readonly IPaymentRepository _paymentRepository;
 

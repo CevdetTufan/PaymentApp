@@ -16,7 +16,7 @@ public class ServiceModule : Module
 
 		// Sorgu handler’ları
 		builder.RegisterType<GetPaymentByIdQueryHandler>()
-			   .As<IQueryHandler<GetPaymentByIdQuery, PaymentDto>>()
+			   .As<IQueryHandler<GetPaymentByIdQuery, PaymentDto?>>()
 			   .InstancePerLifetimeScope();
 	}
 }
