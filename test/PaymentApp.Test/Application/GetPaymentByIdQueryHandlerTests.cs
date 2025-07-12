@@ -1,9 +1,9 @@
-﻿using Moq; 
+﻿using AutoMapper;
+using Moq;
 using PaymentApp.Application.Commands;
 using PaymentApp.Application.Dtos;
 using PaymentApp.Application.Interfaces.Repositories;
 using PaymentApp.Domain.Entities;
-using PaymentApp.Domain.ValueObjects;
 
 namespace PaymentApp.Test.Application;
 
@@ -18,7 +18,20 @@ public class GetPaymentByIdQueryHandlerTests
 			.Setup(r => r.AddAsync(It.IsAny<Payment>(), It.IsAny<CancellationToken>()))
 			.Returns(Task.CompletedTask);
 
-		var handler = new CreatePaymentCommandHandler(repoMock.Object);
+		// Map mock to record with constructor parameters
+		var mapperMock = new Mock<IMapper>();
+		mapperMock
+			.Setup(m => m.Map<PaymentDto>(It.IsAny<Payment>()))
+			.Returns<Payment>(p => new PaymentDto(
+				p.Id,
+				p.CustomerId,
+				p.Amount.Amount,
+				p.Amount.Currency,
+				p.Status.ToString(),
+				p.CreatedAt,
+				p.ProcessedAt));
+
+		var handler = new CreatePaymentCommandHandler(repoMock.Object, mapperMock.Object);
 		var dto = new CreatePaymentDto(Guid.NewGuid(), 25m, "USD");
 		var command = new CreatePaymentCommand(dto);
 
@@ -26,25 +39,32 @@ public class GetPaymentByIdQueryHandlerTests
 		var result = await handler.HandleAsync(command);
 
 		// Assert  
-		Assert.NotEqual(Guid.Empty, result.Id);  
+		Assert.NotNull(result);
+		Assert.NotEqual(Guid.Empty, result.Id);
 		Assert.Equal(dto.CustomerId, result.CustomerId);
 		Assert.Equal(dto.Amount, result.Amount);
 		Assert.Equal(dto.Currency, result.Currency);
 		Assert.Equal("Pending", result.Status);
 	}
 
+
 	[Fact]
-	public async Task HandleAsync_PaymentNotFound_ReturnsNull()
+	public async Task HandleAsync_PaymentNotFound_ThrowsKeyNotFoundException()
 	{
-		// Arrange  
+		// Arrange
+		var id = Guid.NewGuid();
 		var repoMock = new Mock<IPaymentRepository>();
 		repoMock
-			.Setup(r => r.GetByIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
-			.ReturnsAsync((Payment)null!);
+			.Setup(r => r.GetByIdAsync(id, It.IsAny<CancellationToken>()))
+			.ReturnsAsync((Payment?)null);
 
-		var handler = new GetPaymentByIdQueryHandler(repoMock.Object);
-		var result = await handler.HandleAsync(new GetPaymentByIdQuery(Guid.NewGuid()));
+		var mapperMock = new Mock<IMapper>();
+		var handler = new GetPaymentByIdQueryHandler(repoMock.Object, mapperMock.Object);
 
-		Assert.Null(result);
+		// Act & Assert
+		var ex = await Assert.ThrowsAsync<KeyNotFoundException>(() =>
+			handler.HandleAsync(new GetPaymentByIdQuery(id)));
+
+		Assert.Equal($"Payment with ID {id} not found.", ex.Message);
 	}
 }
