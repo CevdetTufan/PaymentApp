@@ -14,13 +14,24 @@ public class CreatePaymentCommandHandlerTests
 		// Arrange
 		var repoMock = new Mock<IPaymentRepository>();
 		repoMock
-			.Setup(r => r.AddAsync(It.IsAny<Payment>(), It.IsAny<CancellationToken>()))
-			.Returns(Task.CompletedTask)
-			.Verifiable();
+		  .Setup(r => r.AddAsync(It.IsAny<Payment>(), It.IsAny<CancellationToken>()))
+		  .Returns(Task.CompletedTask)
+		  .Verifiable();
 
 		var mapperMock = new Mock<IMapper>();
-		var handler = new CreatePaymentCommandHandler(repoMock.Object, mapperMock.Object);
+		mapperMock
+		  .Setup(m => m.Map<PaymentDto>(It.IsAny<Payment>()))
+		  .Returns<Payment>(p => new PaymentDto(
+			  p.Id,
+			  p.CustomerId,
+			  p.Amount.Amount,
+			  p.Amount.Currency,
+			  p.Status.ToString(),
+			  p.CreatedAt,
+			  p.ProcessedAt
+		  ));
 
+		var handler = new CreatePaymentCommandHandler(repoMock.Object, mapperMock.Object);
 		var dto = new CreatePaymentDto(Guid.NewGuid(), 25m, "USD");
 		var command = new CreatePaymentCommand(dto);
 
@@ -35,4 +46,5 @@ public class CreatePaymentCommandHandlerTests
 		Assert.Equal("Pending", result.Status);
 		Assert.NotEqual(default, result.CreatedAt);
 	}
+
 }
