@@ -4,6 +4,7 @@ using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using PaymentApp.Api.Endpoints;
 using PaymentApp.Api.Filters;
+using PaymentApp.Api.Middlewares;
 using PaymentApp.Api.Utilities;
 using PaymentApp.Application.Modules;
 using PaymentApp.Application.Validators;
@@ -76,5 +77,7 @@ app.UseHttpsRedirection();
 
 app.MapHealthEndpoints();
 app.MapPaymentEndpoints();
+
+app.UseMiddleware<ExceptionMiddleware>();
 
 await app.RunAsync();

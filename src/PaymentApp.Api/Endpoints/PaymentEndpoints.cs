@@ -21,9 +21,7 @@ public static class PaymentEndpoints
 		{
 			var dto = await handler.HandleAsync(new GetPaymentByIdQuery(id));
 
-			return dto is null
-				? Results.NotFound()
-				: Results.Ok(dto);
+			Results.Ok(dto);
 		})
 		.WithName("GetPaymentById")
 		.WithOpenApi();

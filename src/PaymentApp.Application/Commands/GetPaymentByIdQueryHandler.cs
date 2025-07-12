@@ -19,7 +19,9 @@ public class GetPaymentByIdQueryHandler : IQueryHandler<GetPaymentByIdQuery, Pay
 	public async Task<PaymentDto?> HandleAsync(GetPaymentByIdQuery query, CancellationToken token = default)
 	{
 		var payment = await _paymentRepository.GetByIdAsync(query.Id, token);
-		if (payment == null) return null;
+
+		if (payment is null) 
+			throw new KeyNotFoundException($"Payment with ID {query.Id} not found.");
 
 		return new PaymentDto(
 			payment.Id,
