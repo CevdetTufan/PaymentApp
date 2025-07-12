@@ -1,4 +1,5 @@
-﻿using PaymentApp.Application.Dtos;
+﻿using AutoMapper;
+using PaymentApp.Application.Dtos;
 using PaymentApp.Application.Interfaces.Handlers;
 using PaymentApp.Application.Interfaces.Repositories;
 using PaymentApp.Domain.Entities;
@@ -12,10 +13,12 @@ public record CreatePaymentCommand(CreatePaymentDto Payload)
 public class CreatePaymentCommandHandler : ICommandHandler<CreatePaymentCommand, PaymentDto>
 {
 	private readonly IPaymentRepository _paymentRepository;
+	private readonly IMapper _mapper;
 
-	public CreatePaymentCommandHandler(IPaymentRepository paymentRepository)
+	public CreatePaymentCommandHandler(IPaymentRepository paymentRepository, IMapper mapper)
 	{
 		_paymentRepository = paymentRepository;
+		_mapper = mapper;
 	}
 
 	public async Task<PaymentDto> HandleAsync(CreatePaymentCommand command, CancellationToken token = default)
@@ -29,15 +32,6 @@ public class CreatePaymentCommandHandler : ICommandHandler<CreatePaymentCommand,
 
 		await _paymentRepository.AddAsync(payment, token);
 
-
-		return new PaymentDto(
-			payment.Id,
-			payment.CustomerId,
-			payment.Amount.Amount,
-			payment.Amount.Currency,
-			payment.Status.ToString(),
-			payment.CreatedAt,
-			payment.ProcessedAt
-		);
+		return _mapper.Map<PaymentDto>(payment);
 	}
 }

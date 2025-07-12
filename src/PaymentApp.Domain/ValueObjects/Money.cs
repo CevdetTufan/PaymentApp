@@ -2,7 +2,6 @@
 
 namespace PaymentApp.Domain.ValueObjects;
 
-[Owned]
 public sealed class Money : IEquatable<Money> // Sealed the class to address S4035
 {
 	public decimal Amount { get; }
