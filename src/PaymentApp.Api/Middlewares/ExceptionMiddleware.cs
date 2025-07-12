@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using PaymentApp.Domain.Exceptions;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace PaymentApp.Api.Middlewares;
@@ -43,6 +44,7 @@ public class ExceptionMiddleware
 			KeyNotFoundException => StatusCodes.Status404NotFound,
 			ArgumentException => StatusCodes.Status400BadRequest,
 			UnauthorizedAccessException => StatusCodes.Status401Unauthorized,
+			BusinessRuleViolationException => StatusCodes.Status422UnprocessableEntity,
 			_ => StatusCodes.Status500InternalServerError
 		};
 
@@ -51,6 +53,7 @@ public class ExceptionMiddleware
 			KeyNotFoundException => "The requested resource was not found.",
 			ArgumentException => "Invalid request parameters.",
 			UnauthorizedAccessException => "You are not authorized to access this resource.",
+			BusinessRuleViolationException => ex.Message,
 			_ => "An unexpected error occurred."
 		};
 
