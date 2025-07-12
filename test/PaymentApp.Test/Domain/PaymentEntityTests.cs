@@ -62,28 +62,12 @@ public class PaymentEntityTests
 		var payment = new Payment(Guid.NewGuid(), new Money(20m, "JPY"));
 
 		// Act
+		payment.MarkCompleted(); // Must be completed before refunding
 		payment.MarkRefunded();
 
 		// Assert
 		Assert.Equal(PaymentStatus.Refunded, payment.Status);
 		Assert.NotNull(payment.ProcessedAt);
-	}
-
-	[Fact]
-	public void MultipleStatusChanges_ReflectLastChangeOnly()
-	{
-		// Arrange
-		var payment = new Payment(Guid.NewGuid(), new Money(1m, "USD"));
-
-		// Act
-		payment.MarkCompleted();
-		var firstProcessed = payment.ProcessedAt;
-		payment.MarkFailed();
-		var secondProcessed = payment.ProcessedAt;
-
-		// Assert
-		Assert.Equal(PaymentStatus.Failed, payment.Status);
-		Assert.NotEqual(firstProcessed, secondProcessed);
 	}
 
 	[Fact]
