@@ -30,15 +30,22 @@ public class PaymentEntityTests
 	public void MarkCompleted_SetsStatusToCompletedAndProcessedAt()
 	{
 		// Arrange
+		var before = DateTime.UtcNow;
 		var payment = new Payment(Guid.NewGuid(), new Money(10m, "EUR"));
 
 		// Act
 		payment.MarkCompleted();
+		var after = DateTime.UtcNow;
 
 		// Assert
 		Assert.Equal(PaymentStatus.Completed, payment.Status);
 		Assert.NotNull(payment.ProcessedAt);
-		Assert.True((DateTime.UtcNow - payment.ProcessedAt.Value).TotalSeconds < 5);
+		// processedAt mutlaka before ile after arasında olmalı
+		Assert.InRange(
+			payment.ProcessedAt.Value,
+			before,
+			after
+		);
 	}
 
 	[Fact]
