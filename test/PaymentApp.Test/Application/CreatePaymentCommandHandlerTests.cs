@@ -1,4 +1,5 @@
-﻿using Moq;
+﻿using AutoMapper;
+using Moq;
 using PaymentApp.Application.Commands;
 using PaymentApp.Application.Dtos;
 using PaymentApp.Application.Interfaces.Repositories;
@@ -17,7 +18,8 @@ public class CreatePaymentCommandHandlerTests
 			.Returns(Task.CompletedTask)
 			.Verifiable();
 
-		var handler = new CreatePaymentCommandHandler(repoMock.Object);
+		var mapperMock = new Mock<IMapper>();
+		var handler = new CreatePaymentCommandHandler(repoMock.Object, mapperMock.Object);
 
 		var dto = new CreatePaymentDto(Guid.NewGuid(), 25m, "USD");
 		var command = new CreatePaymentCommand(dto);

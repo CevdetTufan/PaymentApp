@@ -1,4 +1,5 @@
-﻿using PaymentApp.Application.Dtos;
+﻿using AutoMapper;
+using PaymentApp.Application.Dtos;
 using PaymentApp.Application.Interfaces.Handlers;
 using PaymentApp.Application.Interfaces.Repositories;
 
@@ -10,10 +11,12 @@ public record GetPaymentByIdQuery(Guid Id)
 public class GetPaymentByIdQueryHandler : IQueryHandler<GetPaymentByIdQuery, PaymentDto?>
 {
 	private readonly IPaymentRepository _paymentRepository;
+	private readonly IMapper _mapper;
 
-	public GetPaymentByIdQueryHandler(IPaymentRepository paymentRepository)
+	public GetPaymentByIdQueryHandler(IPaymentRepository paymentRepository, IMapper mapper)
 	{
 		_paymentRepository = paymentRepository;
+		_mapper = mapper;
 	}
 
 	public async Task<PaymentDto?> HandleAsync(GetPaymentByIdQuery query, CancellationToken token = default)
@@ -23,15 +26,7 @@ public class GetPaymentByIdQueryHandler : IQueryHandler<GetPaymentByIdQuery, Pay
 		if (payment is null) 
 			throw new KeyNotFoundException($"Payment with ID {query.Id} not found.");
 
-		return new PaymentDto(
-			payment.Id,
-			payment.CustomerId,
-			payment.Amount.Amount,
-			payment.Amount.Currency,
-			payment.Status.ToString(),
-			payment.CreatedAt,
-			payment.ProcessedAt
-		);
+		return _mapper.Map<PaymentDto>(payment);
 	}
 }
 

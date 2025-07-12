@@ -73,11 +73,11 @@ using (var scope = app.Services.CreateScope())
 	}
 }
 
+app.UseMiddleware<ExceptionMiddleware>();
+
 app.UseHttpsRedirection();
 
 app.MapHealthEndpoints();
 app.MapPaymentEndpoints();
-
-app.UseMiddleware<ExceptionMiddleware>();
 
 await app.RunAsync();
