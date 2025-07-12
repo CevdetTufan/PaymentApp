@@ -48,6 +48,14 @@ public class ServiceModule : Module
 			.As<ICommandHandler<CompletePaymentCommand, PaymentDto>>()
 			   .InstancePerLifetimeScope();
 
+		builder.RegisterType<MarkFailedPaymentCommandHandler>()
+			.As<ICommandHandler<MarkFailedPaymentCommand, PaymentDto>>()
+			   .InstancePerLifetimeScope();
+
+		builder.RegisterType<MarkRefundedPaymentCommandHandler>()
+			.As<ICommandHandler<MarkRefundedPaymentCommand, PaymentDto>>()
+			   .InstancePerLifetimeScope();
+
 		// Sorgu handler’ları
 		builder.RegisterType<GetPaymentByIdQueryHandler>()
 			   .As<IQueryHandler<GetPaymentByIdQuery, PaymentDto?>>()

@@ -52,5 +52,29 @@ public static class PaymentEndpoints
 		})
 		  .WithName("CompletePayment")
 		  .WithOpenApi();
+
+		// PUT /MarkFailedPayment
+		group.MapPut("/failed/{paymentId:guid}", async (
+				Guid paymentId,
+				ICommandHandler<MarkFailedPaymentCommand, PaymentDto> handler
+			) =>
+		{
+			var result = await handler.HandleAsync(new MarkFailedPaymentCommand(paymentId));
+			return Results.Ok(result);
+		})
+		  .WithName("FailedPayment")
+		  .WithOpenApi();
+
+		// PUT /RefundedPayment
+		group.MapPut("/refunded/{paymentId:guid}", async (
+				Guid paymentId,
+				ICommandHandler<MarkRefundedPaymentCommand, PaymentDto> handler
+			) =>
+		{
+			var result = await handler.HandleAsync(new MarkRefundedPaymentCommand(paymentId));
+			return Results.Ok(result);
+		})
+		  .WithName("RefundedPayment")
+		  .WithOpenApi();
 	}
 }
